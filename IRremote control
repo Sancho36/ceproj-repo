@@ -1,6 +1,6 @@
 #include <IRremote.h>
 
-#define IR_RECEIVE_PIN 11
+#define IR_RECEIVE_PIN 8
 #define IR_BUTTON_UP 57
 #define IR_BUTTON_DOWN 58
 #define IR_BUTTON_RIGHT 60
