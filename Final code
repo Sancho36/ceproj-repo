@@ -1,23 +1,33 @@
+//-----LIBRARIES-----
+
+#include <IRremote.h>
 #include <Servo.h>
 
-Servo leftservo;
-Servo rightservo;
+//-----VARIABLES-----
 
-//Version 2023-04-14
-//edit 1: transferred movement functions, wrote first attempt for line tracking code.
+#define IR_RECEIVE_PIN 8
+#define IR_BUTTON_UP 57
+#define IR_BUTTON_DOWN 58
+#define IR_BUTTON_RIGHT 60
+#define IR_BUTTON_LEFT 59
+#define IR_BUTTON_SELECT 61
+#define IR_BUTTON_PLAY 26
+#define IR_BUTTON_HOME 66
+#define IR_BUTTON_PAUSE 25
 
-//----------Variables---------------
 const int ls_pin = 9; //ls for left servo
-const int rs_pin = 10;
+const int rs_pin = 10; //rs for right servo
 const int sensorPin1 = 3; 
 const int sensorPin2 = 4; 
 const int sensorPin3 = 5; 
 const int sensorPin4 = 6; 
 const int sensorPin5 = 7; 
 
-//---------------------Movement functions---------------------------------
-//note: these functions are from our eng phys robot. these should be good for the line following stuff too with little adjustments.
-//stop and go
+Servo leftservo;
+Servo rightservo;
+
+//-----FUNCTIONS-----
+
 void stop(){
   Serial.println("Stopping");
   leftservo.write(90);
@@ -30,31 +40,19 @@ void straight(){
   rightservo.write(10);
 }
 
-//swerves
 void Lturn(){
   Serial.println("Swerving Left");
-  leftservo.write(90); //low power 120-10
-  rightservo.write(70); //full blast(0) +40
+  leftservo.write(90);
+  rightservo.write(70);
 }
 
 void Rturn(){
   Serial.println("Swerving Right");
-  leftservo.write(110); //used to be 105
-  rightservo.write(90); //low power
+  leftservo.write(110);
+  rightservo.write(90); 
 }
 
-//--------------SETUP-------------------
-void setup() {
-  Serial.begin(9600);
-  leftservo.attach(ls_pin);  
-  rightservo.attach(rs_pin);
-  leftservo.write(90);
-  rightservo.write(90);
-}
-
-//-------------LOOP--------------------
-//note: attempt 1 at code for the sensor based on what you told me + my research. lmk if its analog when you check the inputs!
-void loop() {
+void follow_line() {
   int sensorVal1 = digitalRead(sensorPin1);
   int sensorVal2 = digitalRead(sensorPin2);
   int sensorVal3 = digitalRead(sensorPin3);
@@ -93,5 +91,72 @@ void loop() {
   }
   else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
     Lturn();
+  }
+}
+
+//-----SETUP-----
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(IR_RECEIVE_PIN);
+  leftservo.attach(ls_pin);  
+  rightservo.attach(rs_pin);
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+//-----LOOP-----
+
+void loop() {
+  if (IrReceiver.decode()) {
+    IrReceiver.resume();
+    int command = IrReceiver.decodedIRData.command;
+    
+    if (command == IR_BUTTON_UP) {
+        leftservo.write(170);
+        rightservo.write(10);
+    }
+
+    else if (command == IR_BUTTON_DOWN) {
+        leftservo.write(10);
+        rightservo.write(170);
+    }
+
+    else if (command == IR_BUTTON_RIGHT) {
+        leftservo.write(180);
+        rightservo.write(90);
+    }
+
+    else if (command == IR_BUTTON_LEFT) {
+        leftservo.write(90);
+        rightservo.write(0);
+    }
+
+    else if (command == IR_BUTTON_SELECT) {
+        leftservo.write(90);
+        rightservo.write(90);
+    }
+
+    else if (command == IR_BUTTON_PLAY) {
+        
+        while(true){
+            follow_line();
+            
+            if (IrReceiver.decode()){
+                IrReceiver.resume();
+                int command = IrReceiver.decodedIRData.command;
+
+                if (command == IR_BUTTON_PAUSE){
+                    stop();
+                    break;
+                }
+            }
+        }
+    }
+    
+    else if (command == IR_BUTTON_HOME) {
+        leftservo.write(180);
+        rightservo.write(180);
+    }
   }
 }
