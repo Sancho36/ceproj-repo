@@ -18,7 +18,7 @@ void setup() {
   leftservo.attach(9);  
   rightservo.attach(10);
   leftservo.write(90);
-  rightservo.write(85);
+  rightservo.write(90);
 }
 
 void loop() {
@@ -38,7 +38,7 @@ void loop() {
 
     else if (command == IR_BUTTON_RIGHT) {
         leftservo.write(180);
-        rightservo.write(85);
+        rightservo.write(90);
     }
 
     else if (command == IR_BUTTON_LEFT) {
@@ -48,7 +48,7 @@ void loop() {
 
     else if (command == IR_BUTTON_SELECT) {
         leftservo.write(90);
-        rightservo.write(85);
+        rightservo.write(90);
     }
   }
 }
