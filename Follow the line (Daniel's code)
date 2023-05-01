@@ -1,0 +1,94 @@
+#include <Servo.h>
+
+Servo leftservo;
+Servo rightservo;
+
+//Version 2023-04-14
+//edit 1: transferred movement functions, wrote first attempt for line tracking code.
+
+//----------Variables---------------
+const int ls_pin = 9; //ls for left servo
+const int rs_pin = 10;
+const int sensorPin1 = 3; 
+const int sensorPin2 = 4; 
+const int sensorPin3 = 5; 
+const int sensorPin4 = 6; 
+const int sensorPin5 = 7; 
+
+//---------------------Movement functions---------------------------------
+//note: these functions are from our eng phys robot. these should be good for the line following stuff too with little adjustments.
+//stop and go
+void stop(){
+  Serial.println("Stopping");
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+void straight(){
+  Serial.println("Moving straight"); 
+  leftservo.write(170);
+  rightservo.write(10);
+}
+
+//swerves
+void Lturn(){
+  Serial.println("Swerving Left");
+  leftservo.write(90); //low power 120-10
+  rightservo.write(70); //full blast(0) +40
+}
+
+void Rturn(){
+  Serial.println("Swerving Right");
+  leftservo.write(110); //used to be 105
+  rightservo.write(90); //low power
+}
+
+//--------------SETUP-------------------
+void setup() {
+  Serial.begin(9600);
+  leftservo.attach(ls_pin);  
+  rightservo.attach(rs_pin);
+  leftservo.write(90);
+  rightservo.write(90);
+}
+
+//-------------LOOP--------------------
+//note: attempt 1 at code for the sensor based on what you told me + my research. lmk if its analog when you check the inputs!
+void loop() {
+  int sensorVal1 = digitalRead(sensorPin1);
+  int sensorVal2 = digitalRead(sensorPin2);
+  int sensorVal3 = digitalRead(sensorPin3);
+  int sensorVal4 = digitalRead(sensorPin4);
+  int sensorVal5 = digitalRead(sensorPin5);
+
+  if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
+    straight();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == LOW) {
+    straight();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == LOW) {
+    Rturn();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == HIGH && sensorVal5 == HIGH) {
+    Rturn();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == HIGH) {
+    Rturn();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == HIGH) {
+    Rturn();
+  }
+  else if (sensorVal1 == LOW && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
+    Lturn();
+  }
+  else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == LOW) {
+    Lturn();
+  }
+  else if (sensorVal1 == HIGH && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == LOW) {
+    Lturn();
+  }
+  else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
+    Lturn();
+  }
+}
