@@ -71,6 +71,9 @@ void follow_line() {
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == LOW) {
     straight();
   }
+  else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == HIGH) {
+    straight();
+  }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == HIGH && sensorVal5 == HIGH) {
     Rturn();
   }
