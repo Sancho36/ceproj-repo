@@ -5,54 +5,55 @@
 
 //-----VARIABLES-----
 
-#define IR_RECEIVE_PIN 8
-#define IR_BUTTON_UP 57
-#define IR_BUTTON_DOWN 58
-#define IR_BUTTON_RIGHT 60
-#define IR_BUTTON_LEFT 59
-#define IR_BUTTON_SELECT 61
-#define IR_BUTTON_PLAY 26
-#define IR_BUTTON_HOME 66
-#define IR_BUTTON_PAUSE 25
+#define IR_RECEIVE_PIN 8 //pin on the arduino microcontroller connected to the signal pin of the IR sensor
+#define IR_BUTTON_UP 57 //"up" button on the remote control
+#define IR_BUTTON_DOWN 58 //"down" button on the remote control
+#define IR_BUTTON_RIGHT 60 //"right" button on the remote control
+#define IR_BUTTON_LEFT 59 //"left" button on the remote control
+#define IR_BUTTON_SELECT 61 //"select" button on the remote control
+#define IR_BUTTON_PLAY 26 //"play" button on the remote control
+#define IR_BUTTON_HOME 66 //"home" button on the remote control
+#define IR_BUTTON_PAUSE 25 //"pause" button on the remote control
 
 const int ls_pin = 9; //ls for left servo
 const int rs_pin = 10; //rs for right servo
-const int sensorPin1 = 3; 
+const int sensorPin1 = 3; //associated with the leftmost light on the sensor
 const int sensorPin2 = 4; 
 const int sensorPin3 = 5; 
 const int sensorPin4 = 6; 
-const int sensorPin5 = 7; 
+const int sensorPin5 = 7; //associated with the rightmost light on the sensor
 
 Servo leftservo;
 Servo rightservo;
 
 //-----FUNCTIONS-----
 
-void stop(){
+void stop(){ //function that we can call if we want the robot to stop
   Serial.println("Stopping");
   leftservo.write(90);
   rightservo.write(90);
 }
 
-void straight(){
+void straight(){ //function that we can call if we want the robot to go straight
   Serial.println("Moving straight"); 
   leftservo.write(170);
   rightservo.write(10);
 }
 
-void Lturn(){
+void Lturn(){ //function that we can call if we want the robot to turn left
   Serial.println("Swerving Left");
   leftservo.write(90);
   rightservo.write(70);
 }
 
-void Rturn(){
+void Rturn(){ //function that we can call if we want the robot to turn right
   Serial.println("Swerving Right");
   leftservo.write(110);
   rightservo.write(90); 
 }
 
-void follow_line() {
+void follow_line() { //function that we can call when we want to active the line-following capabilities of the robot
+  //associates a binary value to each of the pins on the 5-channel sensor
   int sensorVal1 = digitalRead(sensorPin1);
   int sensorVal2 = digitalRead(sensorPin2);
   int sensorVal3 = digitalRead(sensorPin3);
@@ -60,96 +61,96 @@ void follow_line() {
   int sensorVal5 = digitalRead(sensorPin5);
 
   if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == LOW) {
-    stop();
+    stop(); //00000 => nothing is registered so we stop the robot
   }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
-    straight();
+    straight(); //00100 => the line is being registered perfectly in the middle so we have the robot go straight
   }
   else if (sensorVal1 == LOW && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == LOW) {
-    straight();
+    straight(); //01110 => even if the line is larger, it is still being registered in the middle so we have the robot go straight
   }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == LOW) {
-    straight();
+    straight(); //00110 => line is a bit to the right, but we still have the robot go straight
   }
   else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == HIGH) {
-    straight();
+    straight(); //11111 => we did not know if the robot had to start with the sensor completely on the start line, so this is what this clause is for
   }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == HIGH && sensorVal5 == HIGH) {
-    Rturn();
+    Rturn(); //00011 => line is to the right, so we have the robot turn right
   }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == HIGH) {
-    Rturn();
+    Rturn(); //00001 => line is almost completely to the right, so we have the robot turn right
   }
   else if (sensorVal1 == LOW && sensorVal2 == LOW && sensorVal3 == HIGH && sensorVal4 == HIGH && sensorVal5 == HIGH) {
-    Rturn();
+    Rturn(); //00111 => line is to the right and is larger, so we have the robot turn right (probably could have had the robot go straight)
   }
   else if (sensorVal1 == LOW && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
-    straight();
+    straight(); //01100 => line is a bit to the left, but we still have the robot go straight
   }
   else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == LOW) {
-    Lturn();
+    Lturn(); //11000 => line is to the left, so we have the robot turn left
   }
   else if (sensorVal1 == HIGH && sensorVal2 == LOW && sensorVal3 == LOW && sensorVal4 == LOW && sensorVal5 == LOW) {
-    Lturn();
+    Lturn(); //10000 => line is almost completely to the left, so we have the robot turn left
   }
   else if (sensorVal1 == HIGH && sensorVal2 == HIGH && sensorVal3 == HIGH && sensorVal4 == LOW && sensorVal5 == LOW) {
-    Lturn();
+    Lturn(); //00111 => line is to the left and is larger, so we have the robot turn left (probably could have had the robot go straight)
   }
 }
 
 //-----SETUP-----
 
 void setup() {
-  Serial.begin(9600);
-  IrReceiver.begin(IR_RECEIVE_PIN);
+  Serial.begin(9600); //start the serial monitor
+  IrReceiver.begin(IR_RECEIVE_PIN); //activate the IR sensor for the remote control
   leftservo.attach(ls_pin);  
   rightservo.attach(rs_pin);
-  leftservo.write(90);
-  rightservo.write(90);
+  leftservo.write(90); //stop
+  rightservo.write(90); //stop
 }
 
 //-----LOOP-----
 
 void loop() {
-  if (IrReceiver.decode()) {
-    IrReceiver.resume();
-    int command = IrReceiver.decodedIRData.command;
+  if (IrReceiver.decode()) { //have the IR sensor decode the signal
+    IrReceiver.resume(); //once the IR sensor has registered a signal, have it resume so it can register the next signal
+    int command = IrReceiver.decodedIRData.command; //define variable for the signal the IR sensor registers
     
-    if (command == IR_BUTTON_UP) {
+    if (command == IR_BUTTON_UP) { //if up button is pressed, then go forward
         leftservo.write(170);
         rightservo.write(10);
     }
 
-    else if (command == IR_BUTTON_DOWN) {
+    else if (command == IR_BUTTON_DOWN) { //if down button is pressed, then go backwards
         leftservo.write(10);
         rightservo.write(170);
     }
 
-    else if (command == IR_BUTTON_RIGHT) {
+    else if (command == IR_BUTTON_RIGHT) { //if right button is pressed, then turn right
         leftservo.write(180);
         rightservo.write(90);
     }
 
-    else if (command == IR_BUTTON_LEFT) {
+    else if (command == IR_BUTTON_LEFT) { //if left button is pressed, then turn left
         leftservo.write(90);
         rightservo.write(0);
     }
 
-    else if (command == IR_BUTTON_SELECT) {
+    else if (command == IR_BUTTON_SELECT) { //if select button is pressed, then stop
         leftservo.write(90);
         rightservo.write(90);
     }
 
-    else if (command == IR_BUTTON_PLAY) {
+    else if (command == IR_BUTTON_PLAY) { //if play button is pressed, the activate line-following part of the code
         
         while(true){
-            follow_line();
+            follow_line(); //call follow_line function
             
-            if (IrReceiver.decode()){
+            if (IrReceiver.decode()){ //have the IR sensor still decode in the while loop
                 IrReceiver.resume();
                 int command = IrReceiver.decodedIRData.command;
 
-                if (command == IR_BUTTON_PAUSE){
+                if (command == IR_BUTTON_PAUSE){ //if pause button is pressed, robot stop and while loop breaks
                     stop();
                     break;
                 }
@@ -157,7 +158,7 @@ void loop() {
         }
     }
     
-    else if (command == IR_BUTTON_HOME) {
+    else if (command == IR_BUTTON_HOME) { //if home button is pressed, celebration time
         leftservo.write(180);
         rightservo.write(180);
     }
